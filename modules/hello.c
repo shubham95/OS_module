@@ -57,7 +57,19 @@ extern int (*ksys_write_hook)(unsigned int fd, const char __user *buf, size_t co
 
 extern int checkpoint_pid;
 struct socket *conn_socket = NULL;
+char *dir_name= "connoisseur_dir420";
 
+
+// char* concat(const char *s1, const char *s2)
+// {
+//     const size_t len1 = strlen(s1);
+//     const size_t len2 = strlen(s2);
+//     char *result = malloc(len1 + len2 + 1); // +1 for the null-terminator
+//     // in real code you would check for errors in malloc here
+//     memcpy(result, s1, len1);
+//     memcpy(result + len1, s2, len2 + 1); // +1 to copy the null-terminator
+//     return result;
+// }
 //clent socket-----------------------
 
 
@@ -202,6 +214,7 @@ err:
 
 
  //------------------------------
+ int current_pid =-1,process_fd=-1;
 
 static int (write_hook)(unsigned int fd, const char __user *buf, size_t count){
         stac();
@@ -210,10 +223,13 @@ static int (write_hook)(unsigned int fd, const char __user *buf, size_t count){
         //char response[len+1];
         char reply[len+1];
         int ret = -1;
+
        // ret =strlen(buf);
         //memset(&reply, 0, len+1);
-        //strcat(reply, "HOLA"); 
-        tcp_client_send(conn_socket, buf, strlen(buf), MSG_DONTWAIT);
+        //strcat(reply, "HOLA");
+        if(current_pid == current->pid && fd==process_fd){ 
+                tcp_client_send(conn_socket, buf, strlen(buf), MSG_DONTWAIT);
+        }
         clac();
         return 0;
 }
@@ -221,6 +237,33 @@ static int (write_hook)(unsigned int fd, const char __user *buf, size_t count){
 static int open_hook(int dfd, const char __user *filename, int flags, umode_t mode, int fd){
         stac();
         //printk("fd : [%d] , filename : [%s]\n",fd,filename);
+        char *pch = strstr(filename, dir_name);
+        if(pch){
+                //printk("hooked dir\n");
+                //get file name
+                char *path =filename;
+                char *ssc;
+                int l = 0;
+                ssc = strstr(path, "/");
+                do{
+                l = strlen(ssc) + 1;
+                path = &path[strlen(path)-l+2];
+                ssc = strstr(path, "/");
+                }while(ssc);
+                printk("%s\n", path);
+
+                //send filename
+                char *start="[In Open] :";
+                current_pid = current->pid;
+                process_fd =fd;
+                tcp_client_send(conn_socket, start, strlen(start), MSG_DONTWAIT);
+                tcp_client_send(conn_socket, path, strlen(path), MSG_DONTWAIT);
+                //free(buf);
+
+
+
+        }
+
         clac();
         //printk("Called\n");
         return 0;
@@ -236,7 +279,7 @@ int init_module(void)
         //test();
         printk("connect : [%d]",tcp_client_connect());
 	printk(KERN_INFO " Called world\n"); 
-       // do_sys_open_hook = &open_hook;
+        do_sys_open_hook = &open_hook;
         ksys_write_hook = &write_hook;
 	return 0; 
 } 
