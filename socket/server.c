@@ -8,6 +8,8 @@
 #define PORT 2325 
 int main(int argc, char const *argv[]) 
 { 
+	char *dir_name= "/home/connoisseur/connoisseur_dir420/";
+
 	int server_fd, new_socket, valread; 
 	struct sockaddr_in address; 
 	int opt = 1; 
@@ -51,9 +53,11 @@ int main(int argc, char const *argv[])
 		perror("accept"); 
 		exit(EXIT_FAILURE); 
 	}
-   
-	while( recv( new_socket , buffer, 1024, 0)){
-	  printf("%s\n",buffer );
+   int pos=-1;
+	while( pos =recv( new_socket , buffer, 1024, 0)){
+		buffer[pos]='\0';
+	  printf("%s [%d]\n",buffer,pos );
+	
 	}
 	
 	
