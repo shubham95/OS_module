@@ -1,0 +1,7 @@
+#!/bin/bash
+../modules/make
+sudo rmmod hello
+sudo insmod ../modules/hello.ko
+sudo dmesg -C
+./a.out
+sudo rmmod hello
